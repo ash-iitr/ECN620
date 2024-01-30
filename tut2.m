@@ -1,7 +1,5 @@
-clc;
-clear;
-close all;
-
+%% Question - Simulate the OFDM transmitter and receiver, and plot BER versus SNR. Assume number of sub-carriers = 64, cyclic prefix = 6, channel length = 3, and consider BPSK as the modulation technique. 
+%% Note - Vary the SNR from -5 dB to 55 dB in steps of 5 dB.
 %% parameters
 N = 10^4; % Number of symbols/frames
 N_sc = 64; % Number of Sub-carriers
