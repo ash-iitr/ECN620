@@ -1,5 +1,7 @@
-%% Question - Simulate the OFDM transmitter and receiver, and plot BER versus SNR. Assume number of sub-carriers = 64, cyclic prefix = 6, channel length = 3, and consider BPSK as the modulation technique. 
-%% Note - Vary the SNR from -5 dB to 55 dB in steps of 5 dB.
+clc;
+clear;
+close all;
+
 %% parameters
 N = 10^4; % Number of symbols/frames
 N_sc = 64; % Number of Sub-carriers
@@ -10,6 +12,7 @@ N_BitsPerSym = 64; % Number of bits per OFDM symbol (Same as the number of Sub-c
 snr_dB = -5:5:55; % snr values in dB
 snr_linear = 10.^(snr_dB/10);
 ber = zeros(length(snr_dB),1);
+theory_ber = zeros(length(snr_dB),1);
 % loop through snrs
 for k=1:length(snr_dB)
 %% OFDM Transmitter
@@ -18,51 +21,57 @@ bits = randi([0 1],[N*N_sc,1]);
 bpsk_mod = 2*bits -1;
 % Taking IFFT, normalize the power
 bpsk_sp = reshape(bpsk_mod,N_fft,[]);
-bpsk_ifft = ifft(bpsk_sp);
-% Add CP
-bpsk_ifft_cp = zeros(N_fft+CP,N);
-bpsk_ifft_cp(1:N_fft,:) = bpsk_ifft(1:N_fft,:);
-bpsk_ifft_cp(N_fft+1:end,:) = bpsk_ifft(1:CP,:);
-% generate a multipath channel 
-h = 1/sqrt(2)*(randn(Ch_length,1) + 1i*randn(Ch_length,1));
-% Frequency response of the channel (To use at receiver)
 
-% Convolution of Each symbol with the Random channel
-
-% Concatenation of the symbols
-bpsk_ifft_cp_ps = reshape(bpsk_ifft_cp,[],1);
-% Gaussian noise with mean=0 and var=1
-noise = 1/sqrt(2)*1/sqrt(snr_linear(k)).*(randn(length(bpsk_ifft_cp_ps),1));
-% Adding noise with the input
-rx_noisy_op = bpsk_ifft_cp_ps + noise;
-
-
-
-%% OFDM Receiver
-% Formatting the received vector into symbols
-rx_bpsk_ifft_cp_sp = reshape(rx_noisy_op,N_fft+CP,[]);
-% Remove CP
-rx_bpsk_ifft_sp = rx_bpsk_ifft_cp_sp(1:N_fft,:);
-% Converting into frequency domain
-rx_bpsk_fft_sp = fft(rx_bpsk_ifft_sp);
-% Single Tap Equalizer
-
-% Extracting the required data
-rx_bpsk_fft_ps = reshape(rx_bpsk_fft_sp,[],1);
-% Demodulation
-demod_bits = rx_bpsk_fft_ps>0;
-demod_bits_double = zeros(length(demod_bits),1);
-% Convertion into bits
-for l=1:length(demod_bits)
-    if(demod_bits(l))
-        demod_bits_double(l)=1;
+    for i=1:N
+    
+    bpsk_ifft = (ifft(bpsk_sp(:,i)));
+    % Add CP
+    bpsk_ifft_cp = zeros(N_sc+CP,1);
+    bpsk_ifft_cp(CP+1:end,1) = bpsk_ifft(1:N_sc,1);
+    bpsk_ifft_cp(1:CP,1) = bpsk_ifft(N_sc-CP+1:end,1);
+                    % % Parallel to serial conversion
+                    bpsk_ifft_cp_ps = reshape(bpsk_ifft_cp,1,[]);
+                    % generate a multipath channel 
+                   
+                    h(1,1:Ch_length) = (Ch_length/sqrt(2))*(randn(1,Ch_length) + 1i*randn(1,Ch_length));
+    
+                    % % Convolution of Each symbol with the Random channel
+                    
+                        y = cconv(h,bpsk_ifft_cp_ps,N_sc+CP);
+                 
+                    % % Gaussian noise with mean=0 and var=1 
+    
+                      noise = (1/sqrt(snr_linear(k))).* ( randn(1,N_sc+CP) + 1j* randn(1,N_sc+CP) );
+                    
+                    % % Adding noise with the input
+                   
+                     y_rx = y + noise;
+                   
+    
+    %% OFDM Receiver
+    % Formatting the received vector into symbols                    
+    % % Remove CP
+    
+    rx_bpsk_ifft_sp = y_rx(CP+1:end);
+    
+    % % Converting into frequency domain
+    rx_bpsk_fft_sp = fft(rx_bpsk_ifft_sp);
+    % % Single Tap Equalizer
+    Channel_fft = fft(h,N_sc);
+    eq_fft_bpsk_rx = rx_bpsk_fft_sp./Channel_fft;
+    % % Extracting the required data
+    extracted_data(:,i) = eq_fft_bpsk_rx';
+    
     end
 
-end
-% Count the number of errors
-ber(k) = sum(demod_bits_double~=bits)/(N*N_sc);
-theory_ber(k) = 0.5*(1-sqrt(((CP/N_sc)*snr_linear(k))/((CP/N_sc)*snr_linear(k)+2)));
-
+rx_bpsk_fft_ps = reshape(extracted_data,[],1);
+% % Demodulation
+demod_bits = rx_bpsk_fft_ps>0;
+% % % Convertion into bits 
+% % % Count the number of errors
+ber(k) = sum(demod_bits~=bits)/(N*N_sc);
+%theory_ber(k) = 0.5*(1-sqrt(((Ch_length/N_sc)*snr_linear(k))/((Ch_length/N_sc)*snr_linear(k)+1)));
+theory_ber(k) = 0.5*(1-sqrt((snr_linear(k))/((snr_linear(k))+2)));
 end
 %% Plotting
 % Simulated BER
@@ -70,8 +79,9 @@ end
 % Theoretical BER
 %theory_ber = 0.5*(1+sqrt(snr_linear./snr_linear+2));
 % Plot theoretical BER and simulated BER vs SNR
-plot(snr_dB,ber,'-o');hold on;
-plot(snr_dB,theory_ber,'-*');
+
+semilogy(snr_dB,ber,'-o');hold on;
+semilogy(snr_dB,theory_ber,'-*');
 xlabel('snrdB');
 ylabel('BER');
 legend('Simulation', 'Analytical');
