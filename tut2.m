@@ -15,12 +15,12 @@ ber = zeros(length(snr_dB),1);
 theory_ber = zeros(length(snr_dB),1);
 % loop through snrs
 for k=1:length(snr_dB)
-%% OFDM Transmitter
-% generate input bits and modulate using BPSK
-bits = randi([0 1],[N*N_sc,1]);
-bpsk_mod = 2*bits -1;
-% Taking IFFT, normalize the power
-bpsk_sp = reshape(bpsk_mod,N_fft,[]);
+    %% OFDM Transmitter
+    % generate input bits and modulate using BPSK
+    bits = randi([0 1],[N*N_sc,1]);
+    bpsk_mod = 2*bits -1;
+    % Taking IFFT, normalize the power
+    bpsk_sp = reshape(bpsk_mod,N_fft,[]);
 
     for i=1:N
     
@@ -29,25 +29,25 @@ bpsk_sp = reshape(bpsk_mod,N_fft,[]);
     bpsk_ifft_cp = zeros(N_sc+CP,1);
     bpsk_ifft_cp(CP+1:end,1) = bpsk_ifft(1:N_sc,1);
     bpsk_ifft_cp(1:CP,1) = bpsk_ifft(N_sc-CP+1:end,1);
-                    % % Parallel to serial conversion
-                    bpsk_ifft_cp_ps = reshape(bpsk_ifft_cp,1,[]);
-                    % generate a multipath channel 
-                   
-                    h(1,1:Ch_length) = (Ch_length/sqrt(2))*(randn(1,Ch_length) + 1i*randn(1,Ch_length));
+    % % Parallel to serial conversion
+    bpsk_ifft_cp_ps = reshape(bpsk_ifft_cp,1,[]);
+    % generate a multipath channel 
     
-                    % % Convolution of Each symbol with the Random channel
-                    
-                        y = cconv(h,bpsk_ifft_cp_ps,N_sc+CP);
-                 
-                    % % Gaussian noise with mean=0 and var=1 
+    h(1,1:Ch_length) = (Ch_length/sqrt(2))*(randn(1,Ch_length) + 1i*randn(1,Ch_length));
     
-                      noise = (1/sqrt(snr_linear(k))).* ( randn(1,N_sc+CP) + 1j* randn(1,N_sc+CP) );
-                    
-                    % % Adding noise with the input
-                   
-                     y_rx = y + noise;
-                   
+    % % Convolution of Each symbol with the Random channel
     
+     y = cconv(h,bpsk_ifft_cp_ps,N_sc+CP);
+    
+    % % Gaussian noise with mean=0 and var=1 
+    
+      noise = (1/sqrt(snr_linear(k))).* ( randn(1,N_sc+CP) + 1j* randn(1,N_sc+CP) );
+    
+    % % Adding noise with the input
+    
+     y_rx = y + noise;
+
+
     %% OFDM Receiver
     % Formatting the received vector into symbols                    
     % % Remove CP
