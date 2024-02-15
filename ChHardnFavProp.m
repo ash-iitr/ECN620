@@ -10,9 +10,6 @@ nIter = 1000;        %%%% Number of channel iterations %%%%
 
 %%%% Variable initializing %%%%
 Chan_Users = zeros(nBS,nUser);                         %% Variable to store channel coefficient
-Chan_Norm_user = zeros(nUser,1);                       %% Variable to store the norm or variance of channel between each user and BS
-ChanCrossCorr_user = zeros(nUser,1);                   %% Variable to store the Cross correlation of channel between each user and BS
-ChanMult_Inst = zeros(nUser,1);                        %% Variable to store instantaneous multiplication of channel coefficients for each user
 Chan_hardening_Ratio = zeros(nUser,1);                 %% Variable to check the Chan_Hardening condition
 Fav_Prop_Ratio = zeros(nUser,1);                       %% Variable to check Favourable Propagation condition
 
