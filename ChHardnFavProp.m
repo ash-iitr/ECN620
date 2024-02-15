@@ -50,22 +50,7 @@ xlabel('Number of antennas');
 ylabel('ratio');
 legend('channel herdening ratio of user 1','channel herdening ratio of user 2','Favourable propagation ratio 1','Favourable propagation ratio 2');
 
-% plot(1:length(ratio),ratio);
-%%% Compute the Channel Hardening and Favourable Propagation Ratio %%%
-% for u = 1:nUser
-%     Chan_hardening_Ratio(u) = Chan_Users(:)
-%     for uu = 1:nUser
-%         if (uu ~= u)
-%             Fav_Prop_Ratio(u) = 
-%         end
-%     end
-% end
 
-% 
-% %%% Variable to check Favourable propagation and Channel Hardening Condition %%%
-% FavPropCheck = 1;
-% ChanHardCheck = 1;
-% 
 % disp('Channel Hardening Condition check')
 % disp(Chan_hardening_Ratio)
 % disp('Favourable Propagation Check')
