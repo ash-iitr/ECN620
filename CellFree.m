@@ -48,32 +48,8 @@ for ku = 1:length(Kusers)
         end
         % %% Equation 26 begins
 
-        itee = 100;
-        % for ite = 1:itee % for equation 26
-        % 
-        %     [pilots,G,Yp,Yhatp,C,Gcap,Gamma,Eta] = generateChannels(M,K,rho_p_cf,tau_cf);
-        %     %% Equation 26 begins
-        %     for kte=1:K % Calculate for each user
-        %         num_e = 0;
-        %         for men = 1:M
-        %             num_e = num_e + sqrt(Eta(men,kte))*G(men,kte)*conj(Gcap(men,kte));
-        %         end
-        % 
-        %         den_e1 = 0;
-        %         for ked = 1:K
-        %             if(ked~=kte)
-        %                 den_e_i = 0;
-        %                 for med = 1:M
-        %                     den_e_i = den_e_i + sqrt(Eta(men,ked))*G(men,kte)*conj(Gcap(men,ked));
-        %                 end
-        %                 den_e1 = den_e1 + (abs(den_e_i))^2;
-        %             end
-        %         end
-        % 
-        %         Re_k(kte) = log2(1+ ((rho_d_cf*((abs(num_e))^2))/(rho_d_cf*den_e1 + 1)));
-        % 
-        %     end
-        % end
+        itee = 200;
+
         Cek = zeros(K,1);
        for kth = 1:K %for kth user, iteration will run, then averaged in the end
            Ce = zeros(itee,1);
@@ -93,7 +69,7 @@ for ku = 1:length(Kusers)
                        end
                        tempK = tempK + abs(tempM)^2;
                    else
-                       disp('skipped');
+                       %disp('skipped');
                    end
                end
 
@@ -101,23 +77,24 @@ for ku = 1:length(Kusers)
            end
            Cek(kth) = mean(Ce);
        end
-    Ctest(ku,mm) = mean(Cek);
+    Cerg(ku,mm) = mean(Cek);
     end %end of loop for M antennas at AP
     CapPerUserS(ku,:) = sum(Rs_k,1)/K; % Using statistical
     
 
 end
 
-plot(Map,CapPerUserS(1,:),'-.');
-hold on;
-plot(Map,CapPerUserS(2,:),'-.');
-hold on;
-plot(Map,Ctest(1,:));
-hold on;
-plot(Map,Ctest(2,:));
-legend('Statistical - K=10','Statistical - K=20', 'Exact - K=10', 'Exact - K=20');
+figure(1);
+hold on
+for p=1:length(Kusers)
+    plot(Map,CapPerUserS(p,:),'-.','LineWidth',2,'DisplayName',sprintf('Statistical - K = %d', Kusers(p)));
+    plot(Map,Cerg(p,:),'LineWidth',2,'DisplayName',sprintf('Exact - K = %d', Kusers(p)));
+    legend('-DynamicLegend');
+    legend('show');
+end
+hold off
 xlabel('Number of APs');
-ylabel('Achievable rate per user');
+ylabel('Achievable Rate Per User (bits/s/Hz)');
 
 
 
