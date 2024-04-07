@@ -48,10 +48,10 @@ for ku = 1:length(Kusers)
         end
         % %% Equation 26 begins
 
-        itee = 200;
+        itee = 1000;
 
-        Cek = zeros(K,1);
-       for kth = 1:K %for kth user, iteration will run, then averaged in the end
+        Cek = zeros(1,1); % earlier Cek = zeros(K,1);
+       for kth = 1:1 %for kth user, iteration will run, then averaged in the end - earlier 1:K - no need to run for each user
            Ce = zeros(itee,1);
            for ite = 1:itee
                [~,G,~,~,~,Gcap,~,Eta] = generateChannels(M,K,rho_p_cf,tau_cf);
@@ -77,9 +77,9 @@ for ku = 1:length(Kusers)
            end
            Cek(kth) = mean(Ce);
        end
-    Cerg(ku,mm) = mean(Cek);
+    Cerg(ku,mm) = mean(Cek); % Ergodic capacity
     end %end of loop for M antennas at AP
-    CapPerUserS(ku,:) = sum(Rs_k,1)/K; % Using statistical
+    CapPerUserS(ku,:) = sum(Rs_k,1)/K; % statistical capacity
     
 
 end
@@ -87,8 +87,8 @@ end
 figure(1);
 hold on
 for p=1:length(Kusers)
-    plot(Map,CapPerUserS(p,:),'-.','LineWidth',2,'DisplayName',sprintf('Statistical - K = %d', Kusers(p)));
-    plot(Map,Cerg(p,:),'LineWidth',2,'DisplayName',sprintf('Exact - K = %d', Kusers(p)));
+    plot(Map,CapPerUserS(p,:),'-.','LineWidth',2,'DisplayName',sprintf('Statistical - K = %d', Kusers(p))); % Statistical plot
+    plot(Map,Cerg(p,:),'LineWidth',2,'DisplayName',sprintf('Exact - K = %d', Kusers(p))); % Ergodic plot
     legend('-DynamicLegend');
     legend('show');
 end
